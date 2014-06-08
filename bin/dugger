@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require "dugger/cli"
+
+Dugger::CLI.start(ARGV.dup)
