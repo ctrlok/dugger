@@ -1,16 +1,16 @@
 require "formatador"
 class Formatador
-  def display_line(string = '', indent)
+  def self.display_line(string = '', indent)
     @indent = indent
     if string.is_a? String
       display(string)
-      new_line unless string =~ /\A.*(\s|\t)\Z/
+      new_line unless string =~ /^.*(\s|\t)$/
     else
       display_lines(string)
     end
     nil
   end
-  def display_lines(lines = [])
+  def self.display_lines(lines = [])
     for line in [*lines]
       display_line(line) unless line.empty?
     end
@@ -20,9 +20,10 @@ end
 
 class Dugger
   class Log
+
     module ClassMethods
-      def out(message, intend)
-        binding.pry 
+      def out(message, indent)
+        Formatador.display_line message, indent
       end
     end
 
@@ -30,20 +31,20 @@ class Dugger
       include Dugger::Log::ClassMethods
       def to_chat(message)
       end
-      def log(message, indend=0)
-        out(message, intend)
+      def log(message, indent=0)
+        out(message, indent)
       end
       def vlog(message, indent=0)
-        out(message, intend) if (opt[:verbose] || opt[:debug])
+        out(message, indent) if (Dugger::CLI.method_options[:verbose] || Dugger::CLI.method_options[:debug])
       end
       def dlog(message, indent=0)
-        out(message, intend) if opt[:debug]
+        out(message, indent) if Dugger::CLI.method_options[:debug]
       end
       def elog(message, indent=0)
-        out("[red]#{message}[/]", intend)
+        out("[red]#{message}[/]", indent)
       end
       def wlog(message, indent=0)
-        out("[yellow]#{message}[/]", intend)
+        out("[yellow]#{message}[/]", indent)
       end
     end
   end
