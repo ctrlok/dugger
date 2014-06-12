@@ -3,7 +3,12 @@ class Dugger
     # @@cookbook = {"apt" => object }
     @@stack ||= []
     @@cookbooks ||= {}
-    cookbook = Dugger::Cookbook.new(hash)
+    if @@cookbooks[hash[:name]]
+      cookbook = @@cookbooks[hash[:name]]
+    else
+      cookbook = Dugger::Cookbook.new(hash)
+      @@cookbooks[hash[:name]] = cookbook
+    end
     for depend in hash[:depends]
       if @@cookbooks[depend[:name]]
         vlog "#{depend[:name]} already added to cookbooks graph"
@@ -18,9 +23,8 @@ class Dugger
         @@stack.push(depend_cookbook)
       end
       depend_cookbook.add_parrent(depend[:version], cookbook, hash[:version])
-      cookbook.depend(hash[:version], depend_cookbook, depend[:version])
+      cookbook.add_depend(hash[:version], depend_cookbook, depend[:version])
     end
-    @@cookbooks[hash[:name]] = cookbook
   end
   class Cookbook
     attr_accessor :versions, :name, :depends, :parrents
@@ -40,7 +44,7 @@ class Dugger
       @parrents[version] ||= Array.new 
       @parrents[version].push({:cookbook => cookbook, :version => cookbook_version})
     end
-    def depend(version, cookbook = nil, cookbook_version = nil)
+    def add_depend(version, cookbook = nil, cookbook_version = nil)
       @depends[version] ||= Array.new
       @depends[version].push({:cookbook => cookbook, :version => cookbook_version})
     end
